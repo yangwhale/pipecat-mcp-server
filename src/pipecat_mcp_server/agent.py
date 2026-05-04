@@ -12,7 +12,6 @@ services, allowing an MCP client to listen for user speech and speak responses.
 """
 
 import asyncio
-import sys
 from typing import Any, Optional
 
 from dotenv import load_dotenv
@@ -46,7 +45,7 @@ from pipecat.runner.types import (
 from pipecat.runner.utils import create_transport
 from pipecat.services.stt_service import STTService
 from pipecat.services.tts_service import TTSService
-from pipecat.services.whisper.stt import WhisperSTTService, WhisperSTTServiceMLX
+from pipecat_mcp_server.processors.gemini_stt import GeminiSTTService
 from pipecat.transports.base_transport import BaseTransport, TransportParams
 from pipecat.transports.websocket.fastapi import FastAPIWebsocketParams
 from pipecat.turns.user_stop.turn_analyzer_user_turn_stop_strategy import (
@@ -54,7 +53,7 @@ from pipecat.turns.user_stop.turn_analyzer_user_turn_stop_strategy import (
 )
 from pipecat.turns.user_turn_strategies import UserTurnStrategies
 
-from pipecat_mcp_server.processors.kokoro_tts import KokoroTTSService
+from pipecat_mcp_server.processors.gemini_tts import GeminiTTSService
 from pipecat_mcp_server.processors.screen_capture import ScreenCaptureProcessor
 from pipecat_mcp_server.processors.vision import VisionProcessor
 
@@ -294,13 +293,10 @@ class PipecatMCPAgent:
         return await self._vision.get_result()
 
     def _create_stt_service(self) -> STTService:
-        if sys.platform == "darwin":
-            return WhisperSTTServiceMLX(model="mlx-community/whisper-large-v3-turbo")
-        else:
-            return WhisperSTTService(model="Systran/faster-distil-whisper-large-v3")
+        return GeminiSTTService(model="gemini-3-flash-preview")
 
     def _create_tts_service(self) -> TTSService:
-        return KokoroTTSService(voice_id="af_heart")
+        return GeminiTTSService(model="gemini-3.1-flash-tts-preview", voice="Charon")
 
 
 async def create_agent(runner_args: RunnerArguments) -> PipecatMCPAgent:
