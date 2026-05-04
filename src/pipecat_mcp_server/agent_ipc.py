@@ -106,6 +106,7 @@ def run_pipecat_process(cmd_queue: multiprocessing.Queue, response_queue: multip
     global _cmd_queue, _response_queue
 
     import os
+    import sys
 
     _cmd_queue = cmd_queue
     _response_queue = response_queue
@@ -116,6 +117,9 @@ def run_pipecat_process(cmd_queue: multiprocessing.Queue, response_queue: multip
 
     # Import and run the pipecat main (which will call our bot() function)
     from pipecat.runner.run import main as pipecat_main
+
+    # Bind to all interfaces so the playground is externally accessible
+    sys.argv = ["pipecat-mcp-server", "--host", "0.0.0.0"]
 
     logger.debug("Pipecat MCP Agent process started. Launching Pipecat runner!")
 
